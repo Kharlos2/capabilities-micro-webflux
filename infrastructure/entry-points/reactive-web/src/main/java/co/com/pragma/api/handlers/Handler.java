@@ -1,5 +1,6 @@
 package co.com.pragma.api.handlers;
 
+import co.com.pragma.api.dto.CapacityForBootcampDTO;
 import co.com.pragma.api.dto.SaveCapacityBootcampDTO;
 import co.com.pragma.api.dto.SaveCapacityDTO;
 import co.com.pragma.api.mappers.ICapacityHandlerMapper;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -54,6 +56,17 @@ public class Handler {
                                         .bodyValue(response)
                                 )
                 );
+    }
+    public Mono<ServerResponse> findCapabilitiesByBootcamp (ServerRequest request){
+        Long capacityId = Long.parseLong(request.queryParam("bootcampId").orElse("0"));
+
+        Flux<CapacityForBootcampDTO> technologyFlux =
+                capacityServicePort.findCapabilitiesByBootcamp(capacityId)
+                        .map(capacityHandlerMapper::toCapacityForBootcamp);
+
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(technologyFlux, CapacityForBootcampDTO.class);
     }
 
 }

@@ -18,6 +18,7 @@ public class RouterRest {
         return route(POST("/api/capacity"), handler::saveCapacity)
                 .andRoute(GET("/api/capacity"), handler::listCapacities)
                 .andRoute(POST("/api/capacity-bootcamp"), handler::saveCapacityBootcamp)
+                .andRoute(GET("/api/capacity-bootcamp"), handler::findCapabilitiesByBootcamp)
                 ;
     }
 

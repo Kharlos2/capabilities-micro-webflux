@@ -42,7 +42,7 @@ public class UseCasesConfig {
         }
         @Bean
         public ICapacityBootcampPersistencePort capacityBootcampPersistencePort(){
-                return new CapacityBootcampPersistenceAdapter(capacityBootcampRepository);
+                return new CapacityBootcampPersistenceAdapter(capacityBootcampRepository,capacityMapper);
         }
 
         @Bean

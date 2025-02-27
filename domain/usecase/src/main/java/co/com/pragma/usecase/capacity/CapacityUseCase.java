@@ -65,16 +65,29 @@ public class CapacityUseCase implements ICapacityServicePort {
     @Override
     public Mono<PagedResponse<CapacityTechnologies>> listCapacities(int page, int size, String sortBy, String sortOrder) {
         return capacityPersistencePort.listCapacities(page, size, sortBy, sortOrder)
-                .flatMap(capacity ->
-                        technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId())
-                                .collectList()  // Convertimos el Flux<Technology> a List<Technology>
-                                .zipWith(technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId()).count()) // Obtenemos el conteo
-                                .map(tuple -> new CapacityTechnologies(capacity.getId(), capacity.getName(), tuple.getT1(), capacity.getQuantityTechnologies())) // Asignamos correctamente
-                )
+                .concatMap(capacity -> { // Mantiene el orden de la paginación
+                    Mono<List<Technology>> technologiesMono = technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId())
+                            .collectList()
+                            .cache(); // Evita la doble llamada a getTechnologiesByCapacity
+
+                    Mono<Long> countMono = technologiesMono.map(List::size).map(Integer::longValue); // Convertimos Integer a Long
+
+                    return Mono.zip(technologiesMono, countMono)
+                            .map(tuple -> new CapacityTechnologies(
+                                    capacity.getId(),
+                                    capacity.getName(),
+                                    tuple.getT1(), // Lista de tecnologías
+                                    capacity.getQuantityTechnologies()
+                            ));
+                })
                 .collectList()
-                .flatMap(capacities -> capacityPersistencePort.countCapacities()
-                        .map(totalElements -> new PagedResponse<>(totalElements, page, size, capacities))
-                );
+                .zipWith(capacityPersistencePort.countCapacities().map(i -> i)) // Convertimos a Long si es necesario
+                .map(tuple -> new PagedResponse<>(
+                        tuple.getT2(), // totalElements convertido a Long
+                        page,
+                        size,
+                        tuple.getT1() // Lista de CapacityTechnologies
+                ));
     }
 
     @Override
@@ -99,6 +112,22 @@ public class CapacityUseCase implements ICapacityServicePort {
                             .thenReturn(new ValidationResponse("Save successfully", true));
                 });
     }
+
+    @Override
+    public Flux<CapacityTechnologies> findCapabilitiesByBootcamp(Long bootcampId) {
+        return capacityBootcampPersistencePort.findCapabilitiesByBootcampId(bootcampId)
+                .concatMap(capacity ->
+                        technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId())
+                                .collectList()
+                                .map(technologies -> new CapacityTechnologies(
+                                        capacity.getId(),
+                                        capacity.getName(),
+                                        technologies,
+                                        technologies.size()
+                                ))
+                );
+    }
+
 
     private Mono<Void> validateAcceptanceCriteria(Capacity capacity) {
         if (capacity.getTechnologiesIds().size() < 3) {

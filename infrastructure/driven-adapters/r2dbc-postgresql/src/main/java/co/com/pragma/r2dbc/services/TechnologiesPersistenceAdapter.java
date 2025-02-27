@@ -1,7 +1,7 @@
 package co.com.pragma.r2dbc.services;
 
 import co.com.pragma.model.capacity.models.Capacity;
-import co.com.pragma.model.capacity.models.TechnologiesIds;
+import co.com.pragma.model.capacity.models.TechnologyList;
 import co.com.pragma.model.capacity.models.Technology;
 import co.com.pragma.model.capacity.models.ValidationResponse;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
@@ -29,7 +29,7 @@ public class TechnologiesPersistenceAdapter implements ITechnologiesPersistenceP
     public Mono<ValidationResponse> checkTechnologies(List<Long> technologiesIds) {
         return webClient.post().uri("/validation-technologies")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new TechnologiesIds(technologiesIds))
+                .bodyValue(new TechnologyList(technologiesIds))
                 .retrieve()
                 .bodyToMono(ValidationResponse.class);
     }
