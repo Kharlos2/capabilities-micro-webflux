@@ -27,41 +27,54 @@ public class CapacityUseCase implements ICapacityServicePort {
     @Override
     public Mono<Capacity> saveCapacity(Capacity capacity) {
 
-        validateAcceptanceCriteria(capacity);
 
-        return technologiesPersistencePort.checkTechnologies(capacity.getTechnologiesIds())
+
+        return validateAcceptanceCriteria(capacity).then(
+                technologiesPersistencePort.checkTechnologies(capacity.getTechnologiesIds())
                 .flatMap(validationResponse -> {
                     if (!Boolean.TRUE.equals(validationResponse.getValid())) {
-                        return Mono.error(new HttpException(400, validationResponse.getMessage())); // Error si la validación falla
+                        return Mono.error(new HttpException(400, validationResponse.getMessage()));
                     }
-                    return capacityPersistencePort.saveCapacity(capacity)
-                            .flatMap(savedCapacity -> {
-                                savedCapacity.setTechnologiesIds(capacity.getTechnologiesIds());
-                                return technologiesPersistencePort.saveTechnologiesCapacities(savedCapacity)
-                                        .flatMap(saveSuccess -> Boolean.TRUE.equals(saveSuccess)
-                                                ? Mono.just(savedCapacity) // ✅ Pasamos `savedCapacity`
-                                                : capacityPersistencePort.deleteCapacity(savedCapacity.getId())
-                                                .then(Mono.error(new HttpException(409, "No fue posible crear la relación")))
-                                        );
+                    return capacityPersistencePort.findByName(capacity.getName())
+                            .hasElement()
+                            .flatMap(exists -> {
+                                if (Boolean.TRUE.equals(exists)) {
+                                    return Mono.error(new CustomException(ExceptionsEnum.DUPLICATE_CAPACITY));
+                                }
+
+                                return capacityPersistencePort.saveCapacity(capacity)
+                                        .flatMap(savedCapacity -> {
+                                            savedCapacity.setTechnologiesIds(capacity.getTechnologiesIds());
+                                            return technologiesPersistencePort.saveTechnologiesCapacities(savedCapacity)
+                                                    .flatMap(saveSuccess -> Boolean.TRUE.equals(saveSuccess)
+                                                            ? Mono.just(savedCapacity)
+                                                            : capacityPersistencePort.deleteCapacity(savedCapacity.getId())
+                                                            .then(Mono.error(new HttpException(409, "No fue posible crear la relación")))
+                                                    );
+                                        });
                             });
 
-                });
+                }));
     }
 
-    private Mono<Void> validateAcceptanceCriteria (Capacity capacity){
-        if (capacity.getTechnologiesIds().size() < 3)
-            Mono.error(new CustomException(ExceptionsEnum.MIN_TECHNOLOGIES));
-        if (capacity.getTechnologiesIds().size() > 20)
-            Mono.error(new CustomException(ExceptionsEnum.MAX_TECHNOLOGIES));
+    private Mono<Void> validateAcceptanceCriteria(Capacity capacity) {
+        if (capacity.getTechnologiesIds().size() < 3) {
+            return Mono.error(new CustomException(ExceptionsEnum.MIN_TECHNOLOGIES));
+        }
+        if (capacity.getTechnologiesIds().size() > 20) {
+            return Mono.error(new CustomException(ExceptionsEnum.MAX_TECHNOLOGIES));
+        }
+
         Set<Long> uniqueIds = new HashSet<>();
         List<Long> duplicates = capacity.getTechnologiesIds().stream()
-                .filter(id -> !uniqueIds.add(id)) // Si no se pudo agregar, es un duplicado
+                .filter(id -> !uniqueIds.add(id))
                 .distinct()
                 .toList();
 
         if (!duplicates.isEmpty()) {
             return Mono.error(new CustomException(ExceptionsEnum.DUPLICATE_TECHNOLOGIES));
         }
-        return null;
+
+        return Mono.empty();
     }
 }

@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc.services;
+package co.com.pragma.model.capacity.models;
 
 import java.util.List;
 

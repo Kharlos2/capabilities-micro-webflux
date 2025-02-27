@@ -27,5 +27,11 @@ public class CapacityPersistenceAdapter implements ICapacityPersistencePort{
         return capacityRepository.deleteById(id);
     }
 
+    @Override
+    public Mono<Capacity> findByName(String name) {
+        return capacityRepository.findByName(name).map(capacityMapper::toCapacityModel);
+    }
+
+
 
 }

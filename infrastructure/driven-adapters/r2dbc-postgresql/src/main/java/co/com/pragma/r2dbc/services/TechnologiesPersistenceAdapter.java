@@ -1,13 +1,12 @@
 package co.com.pragma.r2dbc.services;
 
 import co.com.pragma.model.capacity.models.Capacity;
+import co.com.pragma.model.capacity.models.TechnologiesIds;
 import co.com.pragma.model.capacity.models.ValidationResponse;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
 import co.com.pragma.r2dbc.mappers.ICapacityMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +29,7 @@ public class TechnologiesPersistenceAdapter implements ITechnologiesPersistenceP
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new TechnologiesIds(technologiesIds))
                 .retrieve()
-                .bodyToMono(ValidationResponse.class).doOnNext(System.out::println);
+                .bodyToMono(ValidationResponse.class);
     }
 
     @Override
