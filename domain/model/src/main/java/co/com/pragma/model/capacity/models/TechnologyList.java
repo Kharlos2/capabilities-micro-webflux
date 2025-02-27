@@ -2,10 +2,11 @@ package co.com.pragma.model.capacity.models;
 
 import java.util.List;
 
-public class TechnologiesIds {
+public class TechnologyList {
+
     private List<Long> technologiesIds;
 
-    public TechnologiesIds(List<Long> technologiesIds) {
+    public TechnologyList(List<Long> technologiesIds) {
         this.technologiesIds = technologiesIds;
     }
 

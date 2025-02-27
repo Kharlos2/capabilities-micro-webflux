@@ -13,9 +13,23 @@ public class CapacityBootcampEntity {
     private Long capacityId;
     private Long bootcampId;
 
+    public CapacityBootcampEntity(Long id, Long capacityId, Long bootcampId) {
+        this.id = id;
+        this.capacityId = capacityId;
+        this.bootcampId = bootcampId;
+    }
+
     public CapacityBootcampEntity(Long capacityId, Long bootcampId) {
         this.capacityId = capacityId;
         this.bootcampId = bootcampId;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getCapacityId() {
