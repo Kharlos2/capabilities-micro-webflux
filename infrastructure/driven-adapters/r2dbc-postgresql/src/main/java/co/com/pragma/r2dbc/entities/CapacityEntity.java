@@ -20,4 +20,6 @@ public class CapacityEntity {
     private String description;
     @Column("quantity_technologies")
     private int quantityTechnologies;
+
+
 }

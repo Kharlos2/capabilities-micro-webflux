@@ -4,10 +4,8 @@ import co.com.pragma.model.capacity.api.ICapacityServicePort;
 import co.com.pragma.model.capacity.exceptions.CustomException;
 import co.com.pragma.model.capacity.exceptions.ExceptionsEnum;
 import co.com.pragma.model.capacity.exceptions.HttpException;
-import co.com.pragma.model.capacity.models.Capacity;
-import co.com.pragma.model.capacity.models.CapacityTechnologies;
-import co.com.pragma.model.capacity.models.PagedResponse;
-import co.com.pragma.model.capacity.models.Technology;
+import co.com.pragma.model.capacity.models.*;
+import co.com.pragma.model.capacity.spi.ICapacityBootcampPersistencePort;
 import co.com.pragma.model.capacity.spi.ICapacityPersistencePort;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
 import reactor.core.publisher.Flux;
@@ -21,10 +19,12 @@ public class CapacityUseCase implements ICapacityServicePort {
 
     private final ICapacityPersistencePort capacityPersistencePort;
     private final ITechnologiesPersistencePort technologiesPersistencePort;
+    private final ICapacityBootcampPersistencePort capacityBootcampPersistencePort;
 
-    public CapacityUseCase(ICapacityPersistencePort capacityPersistencePort, ITechnologiesPersistencePort technologiesPersistencePort) {
+    public CapacityUseCase(ICapacityPersistencePort capacityPersistencePort, ITechnologiesPersistencePort technologiesPersistencePort, ICapacityBootcampPersistencePort capacityBootcampPersistencePort) {
         this.capacityPersistencePort = capacityPersistencePort;
         this.technologiesPersistencePort = technologiesPersistencePort;
+        this.capacityBootcampPersistencePort = capacityBootcampPersistencePort;
     }
 
 
@@ -75,6 +75,29 @@ public class CapacityUseCase implements ICapacityServicePort {
                 .flatMap(capacities -> capacityPersistencePort.countCapacities()
                         .map(totalElements -> new PagedResponse<>(totalElements, page, size, capacities))
                 );
+    }
+
+    @Override
+    public Mono<ValidationResponse> saveCapacityBootcamp(CapacityBootcamp capacityBootcamp) {
+        List<Long> requestedIds = capacityBootcamp.getCapacities();
+
+        return Flux.fromIterable(requestedIds)
+                .flatMap(capacityPersistencePort::findById) // Buscar en la BD
+                .map(Capacity::getId) // Obtener solo los IDs encontrados
+                .collectList()
+                .flatMap(foundIds -> {
+                    List<Long> missingIds = requestedIds.stream()
+                            .filter(id -> !foundIds.contains(id))
+                            .toList();
+
+                    if (!missingIds.isEmpty()) {
+                        return Mono.just(new ValidationResponse("Missing technologies: " + missingIds, false));
+                    }
+
+                    // Si todas existen, guardar y devolver mensaje exitoso
+                    return capacityBootcampPersistencePort.saveCapacityBootcamp(capacityBootcamp)
+                            .thenReturn(new ValidationResponse("Save successfully", true));
+                });
     }
 
     private Mono<Void> validateAcceptanceCriteria(Capacity capacity) {
