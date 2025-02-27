@@ -5,8 +5,12 @@ import co.com.pragma.model.capacity.exceptions.CustomException;
 import co.com.pragma.model.capacity.exceptions.ExceptionsEnum;
 import co.com.pragma.model.capacity.exceptions.HttpException;
 import co.com.pragma.model.capacity.models.Capacity;
+import co.com.pragma.model.capacity.models.CapacityTechnologies;
+import co.com.pragma.model.capacity.models.PagedResponse;
+import co.com.pragma.model.capacity.models.Technology;
 import co.com.pragma.model.capacity.spi.ICapacityPersistencePort;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -41,7 +45,7 @@ public class CapacityUseCase implements ICapacityServicePort {
                                 if (Boolean.TRUE.equals(exists)) {
                                     return Mono.error(new CustomException(ExceptionsEnum.DUPLICATE_CAPACITY));
                                 }
-
+                                capacity.setQuantityTechnologies(capacity.getTechnologiesIds().size());
                                 return capacityPersistencePort.saveCapacity(capacity)
                                         .flatMap(savedCapacity -> {
                                             savedCapacity.setTechnologiesIds(capacity.getTechnologiesIds());
@@ -55,6 +59,22 @@ public class CapacityUseCase implements ICapacityServicePort {
                             });
 
                 }));
+    }
+
+
+    @Override
+    public Mono<PagedResponse<CapacityTechnologies>> listCapacities(int page, int size, String sortBy, String sortOrder) {
+        return capacityPersistencePort.listCapacities(page, size, sortBy, sortOrder)
+                .flatMap(capacity ->
+                        technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId())
+                                .collectList()  // Convertimos el Flux<Technology> a List<Technology>
+                                .zipWith(technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId()).count()) // Obtenemos el conteo
+                                .map(tuple -> new CapacityTechnologies(capacity.getId(), capacity.getName(), tuple.getT1(), capacity.getQuantityTechnologies())) // Asignamos correctamente
+                )
+                .collectList()
+                .flatMap(capacities -> capacityPersistencePort.countCapacities()
+                        .map(totalElements -> new PagedResponse<>(totalElements, page, size, capacities))
+                );
     }
 
     private Mono<Void> validateAcceptanceCriteria(Capacity capacity) {

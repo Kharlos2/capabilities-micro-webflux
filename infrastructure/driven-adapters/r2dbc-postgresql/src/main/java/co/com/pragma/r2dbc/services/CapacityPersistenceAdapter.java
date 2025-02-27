@@ -4,9 +4,10 @@ import co.com.pragma.model.capacity.models.Capacity;
 import co.com.pragma.model.capacity.spi.ICapacityPersistencePort;
 import co.com.pragma.r2dbc.mappers.ICapacityMapper;
 import co.com.pragma.r2dbc.repositories.ICapacityRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 
 public class CapacityPersistenceAdapter implements ICapacityPersistencePort{
     private final ICapacityRepository capacityRepository;
@@ -32,6 +33,18 @@ public class CapacityPersistenceAdapter implements ICapacityPersistencePort{
         return capacityRepository.findByName(name).map(capacityMapper::toCapacityModel);
     }
 
+    @Override
+    public Flux<Capacity> listCapacities(int page, int size, String sortBy, String sortOrder) {
+        Sort.Direction direction = sortOrder.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
+        return capacityRepository.findAllBy(pageRequest)
+                .map(capacityMapper::toCapacityModel);
+    }
+
+    @Override
+    public Mono<Long> countCapacities() {
+        return capacityRepository.count();
+    }
 
 }

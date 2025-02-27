@@ -7,13 +7,13 @@ public class CapacityTechnologies {
     private Long id;
     private String name;
     private List<Technology> technologies;
-    private Long countTechnologies;
+    private int technologiesCount;
 
-    public CapacityTechnologies(Long id, String name, List<Technology> technologies, Long countTechnologies) {
+    public CapacityTechnologies(Long id, String name, List<Technology> technologies,int technologiesCount) {
         this.id = id;
         this.name = name;
         this.technologies = technologies;
-        this.countTechnologies = countTechnologies;
+        this.technologiesCount = technologiesCount;
     }
 
     public Long getId() {
@@ -40,11 +40,11 @@ public class CapacityTechnologies {
         this.technologies = technologies;
     }
 
-    public Long getCountTechnologies() {
-        return countTechnologies;
+    public int  getTechnologiesCount() {
+        return technologiesCount;
     }
 
-    public void setCountTechnologies(Long countTechnologies) {
-        this.countTechnologies = countTechnologies;
+    public void setTechnologiesCount(int  technologiesCount) {
+        this.technologiesCount = technologiesCount;
     }
 }

@@ -16,6 +16,7 @@ public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/capacity"), handler::saveCapacity)
+                .andRoute(GET("/api/capacity"), handler::listCapacities)
 
                 ;
     }
