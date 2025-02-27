@@ -1,10 +1,10 @@
 package co.com.pragma.api.handlers;
 
+import co.com.pragma.api.dto.SaveCapacityBootcampDTO;
 import co.com.pragma.api.dto.SaveCapacityDTO;
 import co.com.pragma.api.mappers.ICapacityHandlerMapper;
 import co.com.pragma.model.capacity.api.ICapacityServicePort;
 import co.com.pragma.model.capacity.models.Capacity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -32,4 +32,28 @@ public class Handler {
                     .body(capacityServicePort.saveCapacity(saveCapacity), Capacity.class)
         );
     }
+    public Mono<ServerResponse> listCapacities(ServerRequest request) {
+        int page = Integer.parseInt(request.queryParam("page").orElse("0"));
+        int size = Integer.parseInt(request.queryParam("size").orElse("10"));
+        String sortBy = request.queryParam("sortBy").orElse("name");
+        String sortOrder = request.queryParam("sortOrder").orElse("asc");
+
+        return capacityServicePort.listCapacities(page, size, sortBy, sortOrder)
+                .flatMap(response -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(response)
+                );
+    }
+
+    public Mono<ServerResponse> saveCapacityBootcamp(ServerRequest request) {
+        return request.bodyToMono(SaveCapacityBootcampDTO.class)
+                .flatMap(capacityBootcamp ->
+                        capacityServicePort.saveCapacityBootcamp(capacityHandlerMapper.toCapacityBootcampModel(capacityBootcamp))
+                                .flatMap(response -> ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(response)
+                                )
+                );
+    }
+
 }

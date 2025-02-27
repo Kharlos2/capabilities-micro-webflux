@@ -10,6 +10,9 @@ public class Technology {
         this.name = name;
     }
 
+    public Technology() {
+    }
+
     public Long getId() {
         return id;
     }

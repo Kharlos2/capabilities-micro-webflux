@@ -1,10 +1,13 @@
 package co.com.pragma.config;
 
 import co.com.pragma.model.capacity.api.ICapacityServicePort;
+import co.com.pragma.model.capacity.spi.ICapacityBootcampPersistencePort;
 import co.com.pragma.model.capacity.spi.ICapacityPersistencePort;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
 import co.com.pragma.r2dbc.mappers.ICapacityMapper;
+import co.com.pragma.r2dbc.repositories.ICapacityBootcampRepository;
 import co.com.pragma.r2dbc.repositories.ICapacityRepository;
+import co.com.pragma.r2dbc.services.CapacityBootcampPersistenceAdapter;
 import co.com.pragma.r2dbc.services.CapacityPersistenceAdapter;
 import co.com.pragma.r2dbc.services.TechnologiesPersistenceAdapter;
 import co.com.pragma.usecase.capacity.CapacityUseCase;
@@ -18,11 +21,14 @@ public class UseCasesConfig {
         private final ICapacityRepository capacityRepository;
         private final ICapacityMapper capacityMapper;
         private final WebClient webClient;
+        private final ICapacityBootcampRepository capacityBootcampRepository;
 
-        public UseCasesConfig(ICapacityRepository capacityRepository, ICapacityMapper capacityMapper, WebClient webClient) {
+
+        public UseCasesConfig(ICapacityRepository capacityRepository, ICapacityMapper capacityMapper, WebClient webClient, ICapacityBootcampRepository capacityBootcampRepository) {
                 this.capacityRepository = capacityRepository;
                 this.capacityMapper = capacityMapper;
             this.webClient = webClient;
+            this.capacityBootcampRepository = capacityBootcampRepository;
         }
 
         @Bean
@@ -34,10 +40,14 @@ public class UseCasesConfig {
         public ITechnologiesPersistencePort technologiesPersistencePort(){
                 return new TechnologiesPersistenceAdapter(webClient,capacityMapper);
         }
+        @Bean
+        public ICapacityBootcampPersistencePort capacityBootcampPersistencePort(){
+                return new CapacityBootcampPersistenceAdapter(capacityBootcampRepository);
+        }
 
         @Bean
-        public ICapacityServicePort capacityServicePort(ICapacityPersistencePort capacityPersistencePort, ITechnologiesPersistencePort technologiesPersistencePort){
-                return new CapacityUseCase(capacityPersistencePort,technologiesPersistencePort);
+        public ICapacityServicePort capacityServicePort(ICapacityPersistencePort capacityPersistencePort, ITechnologiesPersistencePort technologiesPersistencePort, ICapacityBootcampPersistencePort capacityBootcampPersistencePort){
+                return new CapacityUseCase(capacityPersistencePort,technologiesPersistencePort,capacityBootcampPersistencePort);
         }
 
 }

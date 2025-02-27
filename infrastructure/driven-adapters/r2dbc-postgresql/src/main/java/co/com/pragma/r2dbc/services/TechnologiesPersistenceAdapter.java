@@ -2,12 +2,14 @@ package co.com.pragma.r2dbc.services;
 
 import co.com.pragma.model.capacity.models.Capacity;
 import co.com.pragma.model.capacity.models.TechnologiesIds;
+import co.com.pragma.model.capacity.models.Technology;
 import co.com.pragma.model.capacity.models.ValidationResponse;
 import co.com.pragma.model.capacity.spi.ITechnologiesPersistencePort;
 import co.com.pragma.r2dbc.mappers.ICapacityMapper;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -34,7 +36,6 @@ public class TechnologiesPersistenceAdapter implements ITechnologiesPersistenceP
 
     @Override
     public Mono<Boolean> saveTechnologiesCapacities(Capacity capacity) {
-        System.out.println(capacity.getTechnologiesIds().isEmpty());
         return webClient.post()
                 .uri("/technologies-capacity")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -46,4 +47,13 @@ public class TechnologiesPersistenceAdapter implements ITechnologiesPersistenceP
                 .thenReturn(Boolean.TRUE) // Si llega aquí, la operación fue exitosa
                 .onErrorResume(error -> Mono.just(Boolean.FALSE)); //
     }
+
+    @Override
+    public Flux<Technology> getTechnologiesByCapacity(Long capacityId) {
+        return webClient.get().uri("/technologies-capacity?capacityId=" + capacityId)
+                .retrieve()
+                .bodyToFlux(Technology.class);
+    }
+
+
 }

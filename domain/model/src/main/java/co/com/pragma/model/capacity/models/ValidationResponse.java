@@ -28,4 +28,5 @@ public class ValidationResponse {
     public void setValid(Boolean valid) {
         this.valid = valid;
     }
+
 }
