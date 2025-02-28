@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 public interface ICapacityServicePort {
 
     Mono<Capacity> saveCapacity (Capacity capacity);
-    Mono<PagedResponse<CapacityTechnologies>> listCapacities(int page, int size, String sortBy, String sortOrder);
+    Mono<PagedResponseCapabilities> listCapacities(int page, int size, String sortBy, String sortOrder);
     Mono<ValidationResponse> saveCapacityBootcamp (CapacityBootcamp capacityBootcamp);
     Flux<CapacityTechnologies> findCapabilitiesByBootcamp (Long bootcampId);
 }

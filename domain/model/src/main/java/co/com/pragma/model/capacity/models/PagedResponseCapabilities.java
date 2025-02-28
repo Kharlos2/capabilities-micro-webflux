@@ -2,14 +2,14 @@ package co.com.pragma.model.capacity.models;
 
 import java.util.List;
 
-public class PagedResponse<T> {
+public class PagedResponseCapabilities {
 
     private long count;
     private int page;
     private int size;
-    private List<T> items;
+    private List<CapacityTechnologies> items;
 
-    public PagedResponse(long count, int page, int size, List<T> items) {
+    public PagedResponseCapabilities(long count, int page, int size, List<CapacityTechnologies> items) {
         this.count = count;
         this.page = page;
         this.size = size;
@@ -41,11 +41,11 @@ public class PagedResponse<T> {
         this.size = size;
     }
 
-    public List<T> getItems() {
+    public List<CapacityTechnologies> getItems() {
         return items;
     }
 
-    public void setItems(List<T> items) {
+    public void setItems(List<CapacityTechnologies> items) {
         this.items = items;
     }
 

@@ -6,6 +6,7 @@ import co.com.pragma.api.dto.SaveCapacityDTO;
 import co.com.pragma.api.mappers.ICapacityHandlerMapper;
 import co.com.pragma.model.capacity.api.ICapacityServicePort;
 import co.com.pragma.model.capacity.models.Capacity;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -29,7 +30,7 @@ public class Handler {
 
         Mono<Capacity> capacityMono = serverRequest.bodyToMono(SaveCapacityDTO.class).map(capacityHandlerMapper::toModel);
         return capacityMono.flatMap(saveCapacity->
-            ServerResponse.ok()
+            ServerResponse.status(HttpStatusCode.valueOf(201))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(capacityServicePort.saveCapacity(saveCapacity), Capacity.class)
         );
@@ -51,7 +52,7 @@ public class Handler {
         return request.bodyToMono(SaveCapacityBootcampDTO.class)
                 .flatMap(capacityBootcamp ->
                         capacityServicePort.saveCapacityBootcamp(capacityHandlerMapper.toCapacityBootcampModel(capacityBootcamp))
-                                .flatMap(response -> ServerResponse.ok()
+                                .flatMap(response -> ServerResponse.status(HttpStatusCode.valueOf(201))
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .bodyValue(response)
                                 )

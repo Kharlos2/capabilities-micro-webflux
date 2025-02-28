@@ -219,7 +219,7 @@ class CapacityUseCaseTest {
                 .thenReturn(Flux.just(technology));
         when(capacityPersistencePort.countCapacities()).thenReturn(Mono.just(1L));
 
-        Mono<PagedResponse<CapacityTechnologies>> result = capacityUseCase.listCapacities(page, size, sortBy, sortOrder);
+        Mono<PagedResponseCapabilities> result = capacityUseCase.listCapacities(page, size, sortBy, sortOrder);
 
         StepVerifier.create(result)
                 .expectNextMatches(response ->
@@ -238,8 +238,8 @@ class CapacityUseCaseTest {
     @Test
     void saveCapacityBootcamp_AllIdsExist_ShouldSaveSuccessfully() {
         CapacityBootcamp capacityBootcamp = new CapacityBootcamp(List.of(1L, 2L));
-        Capacity capacity1 = new Capacity(1L);
-        Capacity capacity2 = new Capacity(2L);
+        Capacity capacity1 = new Capacity(1L,"Programacion lineal", "pragma", List.of(1L),1);
+        Capacity capacity2 = new Capacity(2L,"Programacion funcional", "pragma", List.of(1L),1);
 
         when(capacityPersistencePort.findById(1L)).thenReturn(Mono.just(capacity1));
         when(capacityPersistencePort.findById(2L)).thenReturn(Mono.just(capacity2));

@@ -6,6 +6,7 @@ import co.com.pragma.api.dto.SaveCapacityBootcampDTO;
 import co.com.pragma.api.dto.SaveCapacityDTO;
 import co.com.pragma.api.handlers.Handler;
 import co.com.pragma.model.capacity.models.Capacity;
+import co.com.pragma.model.capacity.models.PagedResponseCapabilities;
 import co.com.pragma.model.capacity.models.ValidationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,10 +41,11 @@ public class RouterRest {
                     beanMethod = "saveCapacity",
                     operation = @Operation(
                             operationId = "saveCapacity",
+                            summary = "Creacion de capacidad",
                             requestBody = @RequestBody(content = @Content(schema = @Schema(implementation = SaveCapacityDTO.class))),
                             responses = {
                                     @ApiResponse(
-                                            responseCode = "200",
+                                            responseCode = "201",
                                             description = "Create capacity success.",
                                             content = @Content(schema = @Schema(implementation = Capacity.class))
                                     ),
@@ -75,7 +77,7 @@ public class RouterRest {
                                     @ApiResponse(
                                             responseCode = "200",
                                             description = "Lista de capacidades.",
-                                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = Capacity.class)))
+                                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PagedResponseCapabilities.class)))
                                     )
                             }
                     )
@@ -92,7 +94,7 @@ public class RouterRest {
                             requestBody = @RequestBody(content = @Content(schema = @Schema(implementation = SaveCapacityBootcampDTO.class))),
                             responses = {
                                     @ApiResponse(
-                                            responseCode = "200",
+                                            responseCode = "201",
                                             description = "Se ejecuto correctamente el proceso",
                                             content = @Content(schema = @Schema(implementation = ValidationResponse.class))
                                     ),

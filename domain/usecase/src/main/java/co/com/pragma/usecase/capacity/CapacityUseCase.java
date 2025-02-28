@@ -63,7 +63,7 @@ public class CapacityUseCase implements ICapacityServicePort {
 
 
     @Override
-    public Mono<PagedResponse<CapacityTechnologies>> listCapacities(int page, int size, String sortBy, String sortOrder) {
+    public Mono<PagedResponseCapabilities> listCapacities(int page, int size, String sortBy, String sortOrder) {
         return capacityPersistencePort.listCapacities(page, size, sortBy, sortOrder)
                 .concatMap(capacity -> { // Mantiene el orden de la paginación
                     Mono<List<Technology>> technologiesMono = technologiesPersistencePort.getTechnologiesByCapacity(capacity.getId())
@@ -82,7 +82,7 @@ public class CapacityUseCase implements ICapacityServicePort {
                 })
                 .collectList()
                 .zipWith(capacityPersistencePort.countCapacities().map(i -> i)) // Convertimos a Long si es necesario
-                .map(tuple -> new PagedResponse<>(
+                .map(tuple -> new PagedResponseCapabilities(
                         tuple.getT2(), // totalElements convertido a Long
                         page,
                         size,
