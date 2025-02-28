@@ -19,6 +19,14 @@ public class Capacity {
         this.quantityTechnologies = quantityTechnologies;
     }
 
+    public Capacity(List<Long> technologiesIds) {
+        this.technologiesIds = technologiesIds;
+    }
+
+    public Capacity(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

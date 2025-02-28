@@ -7,6 +7,6 @@ import reactor.core.publisher.Mono;
 
 public interface ICapacityBootcampPersistencePort {
 
-    Mono<Void> saveCapacityBootcamp(CapacityBootcamp capacityBootcamp);
+    Mono<Void>  saveCapacityBootcamp(CapacityBootcamp capacityBootcamp);
     Flux<Capacity> findCapabilitiesByBootcampId(Long bootcampId);
 }

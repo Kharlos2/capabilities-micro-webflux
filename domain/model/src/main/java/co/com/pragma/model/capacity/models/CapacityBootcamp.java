@@ -14,6 +14,10 @@ public class CapacityBootcamp {
         this.bootcampId = bootcampId;
     }
 
+    public CapacityBootcamp(List<Long> capacities) {
+        this.capacities = capacities;
+    }
+
 
     public CapacityBootcamp() {
     }

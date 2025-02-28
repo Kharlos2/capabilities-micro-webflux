@@ -33,8 +33,8 @@ public class CapacityUseCase implements ICapacityServicePort {
 
 
 
-        return validateAcceptanceCriteria(capacity).then(
-                technologiesPersistencePort.checkTechnologies(capacity.getTechnologiesIds())
+        return validateAcceptanceCriteria(capacity)
+                .then(Mono.defer(() -> technologiesPersistencePort.checkTechnologies(capacity.getTechnologiesIds())))
                 .flatMap(validationResponse -> {
                     if (!Boolean.TRUE.equals(validationResponse.getValid())) {
                         return Mono.error(new HttpException(400, validationResponse.getMessage()));
@@ -58,7 +58,7 @@ public class CapacityUseCase implements ICapacityServicePort {
                                         });
                             });
 
-                }));
+                });
     }
 
 
